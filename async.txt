@@ -1,0 +1,18 @@
+use reqwest;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // 发送GET请求
+    let response = reqwest::get("http://10.0.254.125:801/eportal/portal/login?&user_account=20200&user_password=l").await?;
+
+    // 检查响应状态码
+    if response.status().is_success() {
+        // 读取响应内容
+        let body = response.text().await?;
+        println!("Response body: {}", body);
+    } else {
+        println!("Request failed with status code: {}", response.status());
+    }
+
+    Ok(())
+}

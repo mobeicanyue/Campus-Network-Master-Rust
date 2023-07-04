@@ -1,0 +1,155 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' 
+
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+  
+jobs:
+  release:
+    name: Cross build for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    env:
+      build_filename: campus-network-master${{matrix.suffix}}
+      new_filename: 20200XXXXXXXX;114514${{matrix.suffix}}
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        include:
+          # linux
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            release-name: x86_64-linux
+            suffix: ""
+            use-cross: true
+
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+            release-name: aarch64-linux
+            suffix: ""
+            use-cross: true
+
+          # apple
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            release-name: x86_64-macos
+            suffix: ""
+            use-cross: false
+
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            release-name: aarch64-macos
+            suffix: ""
+            use-cross: true
+
+          # windows
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            release-name: x86_64-windows
+            suffix: .exe
+            use-cross: false
+
+          - os: windows-latest
+            # Many compilation tools have insufficient support for arm64 windows
+            target: aarch64-pc-windows-msvc
+            release-name: aarch64-windows
+            suffix: .exe
+            use-cross: true
+
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          override: true
+          profile: minimal
+          toolchain: stable
+          target: ${{ matrix.target }}
+
+      - name: Install Protoc
+        if: matrix.os == 'windows-latest'
+        uses: arduino/setup-protoc@v2
+        with:
+          version: '23.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Cross
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          use-cross: false
+          args: cross --git https://github.com/cross-rs/cross
+
+      - name: Build release
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          use-cross: ${{ matrix.use-cross }}
+          args: --release --target=${{ matrix.target }}
+
+      - name: Strip (MacOS/Window)
+        if: matrix.os != 'ubuntu-latest' && matrix.target != 'aarch64-pc-windows-msvc'
+        continue-on-error: true
+        run: |
+          strip target/${{ matrix.target }}/release/${{env.build_filename}}
+
+      - name: LLVM Strip (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        continue-on-error: true
+        run: |
+          sudo apt install -y llvm
+          llvm-strip target/${{ matrix.target }}/release/${{env.build_filename}}
+
+
+      - name: Compress binaries
+        # Upx may not support some platforms. Ignore the errors
+        continue-on-error: true
+        # Disable upx for mips. See https://github.com/upx/upx/issues/387
+        if: matrix.target != 'aarch64-pc-windows-msvc'
+        uses: svenstaro/upx-action@v2
+        with:
+          strip: false
+          args: -q --best --lzma
+          files: |
+            target/${{ matrix.target }}/release/${{env.build_filename}}
+
+      - name: Modify Filename
+        if: matrix.os != 'windows-latest'
+        run: |
+          mv target/${{ matrix.target }}/release/${{env.build_filename}} "target/${{ matrix.target }}/release/${{env.new_filename}}"
+      - name: Modify Filename (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          move target\${{ matrix.target }}\release\${{env.build_filename}} "target\${{ matrix.target }}\release\${{env.new_filename}}"
+
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: |
+            target/${{ matrix.target }}/release/${{env.new_filename}}
+
+      - name: Zip Release Artifact
+        uses: TheDoctor0/zip-release@0.7.1
+        with:
+          type: zip
+          filename: ${{ matrix.release-name }}.zip
+          directory: target/${{ matrix.target }}/release/
+          path: |
+            ${{env.new_filename}}
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            target/${{ matrix.target }}/release/${{ matrix.release-name }}.zip
+          generate_release_notes: true
