@@ -1,43 +1,83 @@
-use reqwest::blocking::get;
+use reqwest::Error;
 use serde_json::Value;
 use std::env;
-use std::path::Path;
+use case::CaseExt;
 
 fn main() {
     println!("Reading the executable filename...");
-    let os: &str = std::env::consts::OS; // 读取当前系统名称
-    println!("Running on {os} OS"); // 打印当前系统名称
+    let system = std::env::consts::OS;
+    println!("Running on \x1b[5;30;43m {} \x1b[0m OS", system.to_capitalized());
 
-    // 读取当前可执行文件名称
-    let args: Vec<String> = env::args().collect();
-    let filename: String = Path::new(&args[0])
-        .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_string();
+    let filename = get_filename(&system);
+    println!("Executable filename: \x1b[0;30;47m{}\x1b[0m", filename);
 
-    println!("Executable filename: {filename}"); // 打印当前可执行文件名称
-
-    let mut parts = filename.split(';');
-
-    let id: &str = parts.next().unwrap();
-    let passwd: &str = parts.next().unwrap();
-
-    println!("id: {id}, passwd: {passwd}");
+    let (id, passwd) = extract_id_and_password(&filename);
+    println!("id: \x1b[0;37;45m{}\x1b[0m", id);
+    println!("passwd: \x1b[0;30;46m{}\x1b[0m", passwd);
 
     let url_login = format!(
         "http://10.0.254.125:801/eportal/portal/login?&user_account={id}&user_password={passwd}"
     );
+    println!("request url: \x1b[0;37;44m{}\x1b[0m", url_login);
 
-    let response = get(&url_login).unwrap(); // 发送请求
+    for _ in 0..10 {
+        match make_request(&url_login) {
+            Ok(response) => {
+                let flag = response.status();
+                println!("request status code: \x1b[0;37;42m {} \x1b[0m", flag);
 
-    let body = response.text().unwrap(); // 获取响应内容
-    let json_data = body
-        .trim_start_matches("jsonpReturn(")
-        .trim_end_matches(");"); // 去除多余的字符
-    let parsed_data: Value = serde_json::from_str(json_data).unwrap(); // 解析 JSON 数据
-    let msg_value = parsed_data["msg"].as_str().unwrap_or(""); // 获取 msg 字段的值
+                let response_text = response.text().unwrap();
+                println!("response text: {}", response_text);
+                let start_index = response_text.find('(').unwrap() + 1;
+                let end_index = response_text.rfind(')').unwrap();
+                let json_data = &response_text[start_index..end_index];
+                let data: Value = serde_json::from_str(json_data).unwrap();
+                println!("json.msg: \x1b[0;37;41m{}\x1b[0m", data["msg"].as_str().unwrap());
 
-    println!("json msg: {msg_value}");
+                if flag.is_success() {
+                    break;
+                }
+            }
+            Err(err) => {
+                println!("An error occurred during the request: {err}");
+                std::thread::sleep(std::time::Duration::from_secs(3));
+            }
+        }
+    }
+}
+
+fn get_filename(system: &str) -> String {
+    let args: Vec<String> = env::args().collect();
+    let filename = std::path::Path::new(&args[0])
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_owned();
+
+    let filename = if system == "windows" {
+        std::path::Path::new(&filename)
+            .file_stem()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_owned()
+    } else {
+        filename
+    };
+    filename
+}
+
+fn extract_id_and_password(filename: &str) -> (&str, &str) {
+    let mut parts = filename.split(';');
+    let id = parts.next().unwrap();
+    let passwd = parts.next().unwrap();
+    if id.len() != 13 || !id.chars().all(char::is_numeric) {
+        panic!("ID must be a 13-digit number.");
+    }
+    (id, passwd)
+}
+
+fn make_request(url: &str) -> Result<reqwest::blocking::Response, Error> {
+    reqwest::blocking::get(url)
 }
