@@ -1,17 +1,17 @@
-use reqwest::Error;
+use reqwest::blocking;
 use serde_json::Value;
-use std::{env, env::consts};
+use std::{env, path, thread, time};
 
 fn main() {
+    let arch = env::consts::ARCH;
+    let system = env::consts::OS;
+    println!("Running on \x1b[0;30;43m {}-{} \x1b[0m system", arch, system); // 打印架构和系统
+    
     println!("Reading the executable filename...");
-    let arch = consts::ARCH;
-    let system = consts::OS;
-    println!("Running on \x1b[5;30;43m {}-{} \x1b[0m OS",arch, system);
-
     let filename = get_filename(&system);
-    println!("Executable filename: \x1b[0;30;47m{}\x1b[0m", filename);
+    println!("Executable filename: \x1b[0;30;47m{}\x1b[0m", filename); // 打印可执行文件名
 
-    let (id, passwd) = extract_id_and_password(&filename);
+    let (id, passwd) = extract_id_and_password(&filename); // 提取学号和密码
     println!("id: \x1b[0;37;45m{}\x1b[0m", id);
     println!("passwd: \x1b[0;30;46m{}\x1b[0m", passwd);
 
@@ -20,43 +20,51 @@ fn main() {
     );
     println!("request url: \x1b[0;37;44m{}\x1b[0m", url_login);
 
+    // 尝试请求10次，直到请求成功
     for _ in 0..10 {
-        match make_request(&url_login) {
+        match blocking::get(&url_login) {
             Ok(response) => {
-                let flag = response.status();
-                println!("request status code: \x1b[0;37;42m {} \x1b[0m", flag);
+                println!(
+                    "request status code: \x1b[0;37;42m{}\x1b[0m",
+                    response.status()
+                );
 
                 let response_text = response.text().unwrap();
-                println!("response text: {}", response_text);
-                let start_index = response_text.find('(').unwrap() + 1;
-                let end_index = response_text.rfind(')').unwrap();
-                let json_data = &response_text[start_index..end_index];
-                let data: Value = serde_json::from_str(json_data).unwrap();
-                println!("json.msg: \x1b[0;37;41m{}\x1b[0m", data["msg"].as_str().unwrap());
-
-                if flag.is_success() {
-                    break;
-                }
+                let data: Value = extract_json_data(&response_text);
+                println!(
+                    "json.msg: \x1b[0;37;41m{}\x1b[0m",
+                    data["msg"].as_str().unwrap()
+                );
+                return; // 请求成功，退出程序
             }
             Err(err) => {
-                println!("An error occurred during the request: {err}");
-                std::thread::sleep(std::time::Duration::from_secs(3));
+                if let Some(status) = err.status() {
+                    // 如果是请求失败，打印状态码。如果没有物理连接就跳过，如wifi没连接
+                    println!(
+                        "request failed, status code: \x1b[0;37;42m{}\x1b[0m",
+                        status
+                    );
+                }
+                println!("An error occurred during the request: {}", err);
+                thread::sleep(time::Duration::from_secs(3));
             }
         }
     }
+    println!("Exceeded maximum number of attempts. Request failed.")
 }
 
 fn get_filename(system: &str) -> String {
     let args: Vec<String> = env::args().collect();
-    let filename = std::path::Path::new(&args[0])
+    let filename = path::Path::new(&args[0]) // 获取可执行文件名
         .file_name()
         .unwrap()
         .to_str()
         .unwrap()
         .to_owned();
 
+    // windows系统下，去掉.exe后缀
     let filename = if system == "windows" {
-        std::path::Path::new(&filename)
+        path::Path::new(&filename)
             .file_stem()
             .unwrap()
             .to_str()
@@ -78,6 +86,10 @@ fn extract_id_and_password(filename: &str) -> (&str, &str) {
     (id, passwd)
 }
 
-fn make_request(url: &str) -> Result<reqwest::blocking::Response, Error> {
-    reqwest::blocking::get(url)
+fn extract_json_data(response_text: &str) -> Value {
+    let start_index = response_text.find('(').unwrap() + 1;
+    let end_index = response_text.rfind(')').unwrap();
+    let json_data = &response_text[start_index..end_index];
+
+    serde_json::from_str(json_data).unwrap()
 }
