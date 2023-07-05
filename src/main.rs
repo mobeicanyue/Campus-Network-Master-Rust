@@ -1,12 +1,12 @@
 use reqwest::Error;
 use serde_json::Value;
-use std::env;
-use case::CaseExt;
+use std::{env, env::consts};
 
 fn main() {
     println!("Reading the executable filename...");
-    let system = std::env::consts::OS;
-    println!("Running on \x1b[5;30;43m {} \x1b[0m OS", system.to_capitalized());
+    let arch = consts::ARCH;
+    let system = consts::OS;
+    println!("Running on \x1b[5;30;43m {}-{} \x1b[0m OS",arch, system);
 
     let filename = get_filename(&system);
     println!("Executable filename: \x1b[0;30;47m{}\x1b[0m", filename);

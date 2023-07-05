@@ -13,7 +13,7 @@ env:
   
 jobs:
   release:
-    name: Cross build for ${{ matrix.target }}
+    name: Cross build for ${{ matrix.release-name }}
     runs-on: ${{ matrix.os }}
     env:
       build_filename: campus-network-master${{matrix.suffix}}
@@ -33,6 +33,12 @@ jobs:
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
             release-name: aarch64-linux
+            suffix: ""
+            use-cross: true
+
+          - os: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            release-name: armv7-linux
             suffix: ""
             use-cross: true
 
