@@ -32,13 +32,13 @@ jobs:
 
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
-            release-name: aarch64-linux
+            release-name: arm64-linux
             suffix: ""
             use-cross: true
 
           - os: ubuntu-latest
-            target: armv7-unknown-linux-gnueabihf
-            release-name: armv7-linux
+            target: armv7-unknown-linux-musleabihf
+            release-name: armv7-linux-eabihf
             suffix: ""
             use-cross: true
 
@@ -51,7 +51,7 @@ jobs:
 
           - os: macos-latest
             target: aarch64-apple-darwin
-            release-name: aarch64-macos
+            release-name: arm64-macos
             suffix: ""
             use-cross: true
 
@@ -65,7 +65,7 @@ jobs:
           - os: windows-latest
             # Many compilation tools have insufficient support for arm64 windows
             target: aarch64-pc-windows-msvc
-            release-name: aarch64-windows
+            release-name: arm64-windows
             suffix: .exe
             use-cross: true
 
