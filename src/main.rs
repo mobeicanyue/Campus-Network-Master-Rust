@@ -3,8 +3,8 @@ use serde_json::Value;
 use std::{env, path, thread, time};
 
 fn main() {
-    let arch = env::consts::ARCH;
-    let system = env::consts::OS;
+    let arch: &str = env::consts::ARCH;
+    let system: &str = env::consts::OS;
     println!("Running on \x1b[0;30;43m {}-{} \x1b[0m system", arch, system); // 打印架构和系统
     
     println!("Reading the executable filename...");
@@ -15,7 +15,7 @@ fn main() {
     println!("id: \x1b[0;37;45m{}\x1b[0m", id);
     println!("passwd: \x1b[0;30;46m{}\x1b[0m", passwd);
 
-    let url_login = format!(
+    let url_login: String = format!(
         "http://10.0.254.125:801/eportal/portal/login?&user_account={id}&user_password={passwd}"
     );
     println!("request url: \x1b[0;37;44m{}\x1b[0m", url_login);
@@ -28,6 +28,13 @@ fn main() {
                     "request status code: \x1b[0;37;42m{}\x1b[0m",
                     response.status()
                 );
+                if response.status() != 200 {
+                    println!("Request failed. Retrying...");
+                    thread::sleep(time::Duration::from_secs(3));
+                    continue;
+                } else {
+                    println!("Request succeeded. Congratulations!");
+                }
 
                 let response_text = response.text().unwrap();
                 let data: Value = extract_json_data(&response_text);
@@ -38,13 +45,6 @@ fn main() {
                 return; // 请求成功，退出程序
             }
             Err(err) => {
-                if let Some(status) = err.status() {
-                    // 如果是请求失败，打印状态码。如果没有物理连接就跳过，如wifi没连接
-                    println!(
-                        "request failed, status code: \x1b[0;37;42m{}\x1b[0m",
-                        status
-                    );
-                }
                 println!("An error occurred during the request: {}", err);
                 thread::sleep(time::Duration::from_secs(3));
             }
