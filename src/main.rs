@@ -3,22 +3,25 @@ use serde_json::Value;
 use std::{env, path, thread, time};
 
 fn main() {
+    // 打印架构和系统
     let arch: &str = env::consts::ARCH;
     let system: &str = env::consts::OS;
-    println!("Running on \x1b[0;30;43m {}-{} \x1b[0m system", arch, system); // 打印架构和系统
+    println!("Running on \x1b[0;30;43m {}-{} \x1b[0m system", arch, system);
     
+    // 打印可执行文件名
     println!("Reading the executable filename...");
     let filename = get_filename(&system);
-    println!("Executable filename: \x1b[0;30;47m{}\x1b[0m", filename); // 打印可执行文件名
+    println!("Executable filename: \x1b[0;30;47m{}\x1b[0m", filename);
 
-    let (id, passwd) = extract_id_and_password(&filename); // 提取学号和密码
+    // 提取学号和密码
+    let (id, passwd) = extract_id_and_password(&filename);
     println!("id: \x1b[0;37;45m{}\x1b[0m", id);
     println!("passwd: \x1b[0;30;46m{}\x1b[0m", passwd);
 
     let url_login: String = format!(
         "http://10.0.254.125:801/eportal/portal/login?&user_account={id}&user_password={passwd}"
     );
-    println!("request url: \x1b[0;37;44m{}\x1b[0m", url_login);
+    // println!("request url: \x1b[0;37;44m{}\x1b[0m", url_login);
 
     // 尝试请求10次，直到请求成功
     for _ in 0..10 {
@@ -42,6 +45,7 @@ fn main() {
                     "json.msg: \x1b[0;37;41m{}\x1b[0m",
                     data["msg"].as_str().unwrap()
                 );
+                thread::sleep(time::Duration::from_secs(2));
                 return; // 请求成功，退出程序
             }
             Err(err) => {
@@ -91,5 +95,8 @@ fn extract_json_data(response_text: &str) -> Value {
     let end_index = response_text.rfind(')').unwrap();
     let json_data = &response_text[start_index..end_index];
 
-    serde_json::from_str(json_data).unwrap()
+    match serde_json::from_str(json_data) {
+        Ok(data) => data,
+        Err(err) => panic!("Failed to parse JSON: {},\n Please contact the developer with a bug report", err),
+    }
 }
