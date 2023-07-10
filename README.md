@@ -11,11 +11,11 @@
 ## **使用方法**
 1. 下载适合你操作系统的可执行文件
 2. 解压可执行文件
-3. 重命名你的可执行文件为 `学号:密码` 格式  
-    如 `2020051XXXXXX:123456.exe`（Windows） 或者 `2020051XXXXXX:123456`（Linux 或 macos）
+3. 重命名你的可执行文件为 `学号;密码` 格式  
+    如 `2020051XXXXXX;123456.exe`（Windows） 或者 `2020051XXXXXX;123456`（Linux 或 macos）
 4. 运行可执行文件  
     Windows 双击运行;  
-    Linux 或 macos 打开终端，输入 `./2020051XXXXXX:123456` 回车
+    Linux 或 macos 打开终端，输入 `./2020051XXXXXX;123456` 回车
 ### 运行截图
 ![image](https://github.com/mobeicanyue/Campus-Network-Master-Rust/assets/81098819/d2b85c04-bb41-4b9b-90f4-1287c0cc461f)
 ## **设置开机自启（可选）**
