@@ -1,4 +1,4 @@
-# Campus Network Master for CQNU in `Rust`
+# Login to CQNU campus network in `Rust`
 [![Release](https://github.com/mobeicanyue/Campus-Network-Master-Rust/actions/workflows/release.yml/badge.svg)](https://github.com/mobeicanyue/Campus-Network-Master-Rust/actions/workflows/release.yml)
 
 * 用Rust 实现的Campus Network Master for CQNU 校园网登陆
@@ -20,8 +20,8 @@
 ![image](https://github.com/mobeicanyue/Campus-Network-Master-Rust/assets/81098819/d2b85c04-bb41-4b9b-90f4-1287c0cc461f)
 ## **设置开机自启（可选）**
 ### **Windows**
-1. 输入 ```Win + R``` 打开运行窗口
-2. 输入 ```shell:startup``` 打开启动文件夹
+1. 输入 `Win + R` 打开运行窗口
+2. 输入 `shell:startup` 打开启动文件夹
 3. 将可执行文件复制到启动文件夹
 4. 这样就可以开机自启了
 
