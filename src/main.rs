@@ -25,6 +25,13 @@ fn main() {
     );
     // println!("request url: \x1b[0;37;44m{}\x1b[0m", url_login);
 
+    // Windows下 等待物理连接建立
+    #[cfg(target_os = "windows")]
+    {
+        println!("Waiting for physical connection...");
+        thread::sleep(time::Duration::from_secs(5));
+    }
+
     // 尝试请求10次，直到请求成功
     for _ in 0..10 {
         match blocking::get(&url_login) {
