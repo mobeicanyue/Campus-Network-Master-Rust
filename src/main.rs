@@ -2,6 +2,8 @@ use reqwest::blocking;
 use serde_json::Value;
 use std::{env, path, thread, time};
 
+const FAILURE_WAIT_TIME:u64 = 4; // 请求失败后等待的时间，单位：秒
+
 fn main() {
     // 打印架构和系统
     let arch: &str = env::consts::ARCH;
@@ -10,7 +12,7 @@ fn main() {
     
     // 打印可执行文件名
     println!("Reading the executable filename...");
-    let filename = get_filename(&system);
+    let filename = get_filename();
     println!("Executable filename: \x1b[0;30;47m{}\x1b[0m", filename);
 
     // 提取学号和密码
@@ -33,7 +35,7 @@ fn main() {
                 );
                 if response.status() != 200 {
                     println!("Request failed. Retrying...");
-                    thread::sleep(time::Duration::from_secs(3));
+                    thread::sleep(time::Duration::from_secs(FAILURE_WAIT_TIME));
                     continue;
                 } else {
                     println!("Request succeeded. Congratulations!");
@@ -50,14 +52,14 @@ fn main() {
             }
             Err(err) => {
                 println!("An error occurred during the request: {}", err);
-                thread::sleep(time::Duration::from_secs(3));
+                thread::sleep(time::Duration::from_secs(FAILURE_WAIT_TIME));
             }
         }
     }
     println!("Exceeded maximum number of attempts. Request failed.")
 }
 
-fn get_filename(system: &str) -> String {
+fn get_filename() -> String {
     let args: Vec<String> = env::args().collect();
     let filename = path::Path::new(&args[0]) // 获取可执行文件名
         .file_name()
@@ -67,15 +69,14 @@ fn get_filename(system: &str) -> String {
         .to_owned();
 
     // windows系统下，去掉.exe后缀
-    let filename = if system == "windows" {
+    #[cfg(target_os = "windows")]
+    let filename = {
         path::Path::new(&filename)
             .file_stem()
             .unwrap()
             .to_str()
             .unwrap()
             .to_owned()
-    } else {
-        filename
     };
     filename
 }
