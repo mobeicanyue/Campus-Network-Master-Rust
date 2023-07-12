@@ -73,6 +73,24 @@ jobs:
         run: |
           cross build --release --locked --target ${{ matrix.target }} 
 
+      - name: Strip (x86_64)
+        if: contains(matrix.target, 'x86_64')
+        continue-on-error: true
+        run: |
+          strip target/${{ matrix.target }}/release/${{env.build_filename}}
+
+      - name: Compress binaries by UPX
+        # Upx may not support some platforms. Ignore the errors
+        continue-on-error: true
+        # Disable upx for mips. See https://github.com/upx/upx/issues/387
+        if: matrix.target != 'aarch64-pc-windows-msvc'
+        uses: svenstaro/upx-action@v2
+        with:
+          strip: false
+          args: -q --best --ultra-brute
+          files: |
+            target/${{ matrix.target }}/release/${{env.build_filename}}
+
       - name: Modify Filename
         if: matrix.os != 'windows-latest'
         run: |
