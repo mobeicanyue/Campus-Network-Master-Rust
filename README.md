@@ -12,7 +12,8 @@
 1. 下载适合你操作系统的可执行文件
 2. 解压可执行文件
 3. 重命名你的可执行文件为 `学号;密码` 格式  
-    如 `2020051XXXXXX;123456.exe`（Windows） 或者 `2020051XXXXXX;123456`（Linux 或 macos）
+    如 `2020051XXXXXX;123456.exe`（Windows） 或者  
+    `2020051XXXXXX;123456`（Linux 或 macos）
 4. 运行可执行文件  
     Windows 双击运行;  
     Linux 或 macos 打开终端，输入 `./2020051XXXXXX;123456` 回车
