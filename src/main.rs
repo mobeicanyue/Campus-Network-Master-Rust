@@ -20,8 +20,11 @@ fn main() {
     println!("id: \x1b[0;37;45m{}\x1b[0m", id);
     println!("passwd: \x1b[0;30;46m{}\x1b[0m", passwd);
 
-    let url_login: String = format!(
+    let _url_login: String = format!(
         "http://10.0.254.125:801/eportal/portal/login?&user_account={id}&user_password={passwd}"
+    );
+    let url_login_https: String = format!(
+        "https://auth.cqnu.edu.cn:802/eportal/portal/login?&user_account={id}&user_password={passwd}"
     );
     // println!("request url: \x1b[0;37;44m{}\x1b[0m", url_login);
 
@@ -34,7 +37,7 @@ fn main() {
 
     // 尝试请求10次，直到请求成功
     for _ in 0..10 {
-        match blocking::get(&url_login) {
+        match blocking::get(&url_login_https) {
             Ok(response) => {
                 println!(
                     "request status code: \x1b[0;37;42m{}\x1b[0m",
