@@ -81,24 +81,24 @@ jobs:
         run: |
           cross build --release --target ${{ matrix.target }}
 
-      - name: Strip (MacOS/Window)
-        if: matrix.os != 'ubuntu-latest' && matrix.target != 'aarch64-pc-windows-msvc'
-        continue-on-error: true
-        run: |
-          strip target/${{ matrix.target }}/release/${{env.build_filename}}
+      # - name: Strip (MacOS/Window)
+      #   if: matrix.os != 'ubuntu-latest' && matrix.target != 'aarch64-pc-windows-msvc'
+      #   continue-on-error: true
+      #   run: |
+      #     strip target/${{ matrix.target }}/release/${{env.build_filename}}
 
-      - name: LLVM Strip (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        continue-on-error: true
-        run: |
-          sudo apt install -y llvm
-          llvm-strip target/${{ matrix.target }}/release/${{env.build_filename}}
+      # - name: LLVM Strip (Linux)
+      #   if: matrix.os == 'ubuntu-latest'
+      #   continue-on-error: true
+      #   run: |
+      #     sudo apt install -y llvm
+      #     llvm-strip target/${{ matrix.target }}/release/${{env.build_filename}}
 
       - name: Compress binaries
         # Upx may not support some platforms. Ignore the errors
         continue-on-error: true
         # Disable upx for mips. See https://github.com/upx/upx/issues/387
-        if: matrix.target != 'aarch64-pc-windows-msvc'
+        # if: matrix.target != 'aarch64-pc-windows-msvc'
         uses: svenstaro/upx-action@v2
         with:
           strip: false
