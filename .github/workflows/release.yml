@@ -22,40 +22,40 @@ jobs:
           # linux
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-            release-name: LogInCQNU-x86_64-linux
+            release-name: LogInCQNU-Linux-x86_64
             suffix: ""
 
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
-            release-name: LogInCQNU-arm64-linux
+            release-name: LogInCQNU-Linux-arm64
             suffix: ""
 
           - os: ubuntu-latest
             target: armv7-unknown-linux-musleabihf
-            release-name: LogInCQNU-armv7-linux-eabihf
+            release-name: LogInCQNU-Linux-armv7-eabihf
             suffix: ""
 
           # apple
           - os: macos-latest
             target: x86_64-apple-darwin
-            release-name: LogInCQNU-x86_64-macos
+            release-name: LogInCQNU-MacOS-x86_64
             suffix: ""
 
           - os: macos-latest
             target: aarch64-apple-darwin
-            release-name: LogInCQNU-arm64-macos
+            release-name: LogInCQNU-MacOS-arm64
             suffix: ""
 
           # windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            release-name: LogInCQNU-x86_64-windows
+            release-name: LogInCQNU-Windows-x86_64
             suffix: .exe
 
           - os: windows-latest
             # Many compilation tools have insufficient support for arm64 windows
             target: aarch64-pc-windows-msvc
-            release-name: LogInCQNU-arm64-windows
+            release-name: LogInCQNU-Windows-arm64
             suffix: .exe
 
     steps:
