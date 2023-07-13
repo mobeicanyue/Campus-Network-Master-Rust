@@ -101,7 +101,7 @@ jobs:
           move target\${{ matrix.target }}\release\${{env.build_filename}} "target\${{ matrix.target }}\release\${{env.new_filename}}"
 
       - name: Markdown to PDF
-        uses: lothindir/pandoc-markdown-action@v0.1
+        uses: lothindir/pandoc-markdown-action@0.2
         with:
           markdown: "README.md"
           pdf: "README"
