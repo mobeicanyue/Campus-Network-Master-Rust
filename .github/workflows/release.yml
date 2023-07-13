@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*' 
+      - "v*.*.*"
 
   workflow_dispatch:
 
@@ -22,40 +22,40 @@ jobs:
           # linux
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-            release-name: x86_64-linux
+            release-name: LogInCQNU-x86_64-linux
             suffix: ""
 
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
-            release-name: arm64-linux
+            release-name: LogInCQNU-arm64-linux
             suffix: ""
 
           - os: ubuntu-latest
             target: armv7-unknown-linux-musleabihf
-            release-name: armv7-linux-eabihf
+            release-name: LogInCQNU-armv7-linux-eabihf
             suffix: ""
 
           # apple
           - os: macos-latest
             target: x86_64-apple-darwin
-            release-name: x86_64-macos
+            release-name: LogInCQNU-x86_64-macos
             suffix: ""
 
           - os: macos-latest
             target: aarch64-apple-darwin
-            release-name: arm64-macos
+            release-name: LogInCQNU-arm64-macos
             suffix: ""
 
           # windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            release-name: x86_64-windows
+            release-name: LogInCQNU-x86_64-windows
             suffix: .exe
 
           - os: windows-latest
             # Many compilation tools have insufficient support for arm64 windows
             target: aarch64-pc-windows-msvc
-            release-name: arm64-windows
+            release-name: LogInCQNU-arm64-windows
             suffix: .exe
 
     steps:
@@ -65,13 +65,13 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-      
+
       - name: Install Cross
         run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build Release
         run: |
-          cross build --release --locked --target ${{ matrix.target }} 
+          cross build --release --locked --target ${{ matrix.target }}
 
       - name: Strip (x86_64)
         if: contains(matrix.target, 'x86_64')
@@ -104,12 +104,21 @@ jobs:
         with:
           path: |
             target/${{ matrix.target }}/release/${{env.new_filename}}
+      - name: Get tag name
+        if: matrix.os != 'windows-latest'
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Get tag name (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          $env:TAG_NAME = $env:GITHUB_REF -replace '^refs/tags/v'
+          echo "TAG_NAME=$env:TAG_NAME" >> $env:GITHUB_ENV
 
       - name: Zip Release Artifact
         uses: TheDoctor0/zip-release@0.7.1
         with:
           type: zip
-          filename: ${{ matrix.release-name }}.zip
+          filename: ${{ matrix.release-name }}-${{ env.TAG_NAME }}.zip
           directory: target/${{ matrix.target }}/release/
           path: |
             ${{env.new_filename}}
@@ -121,6 +130,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            target/${{ matrix.target }}/release/${{ matrix.release-name }}.zip
+            target/${{ matrix.target }}/release/${{ matrix.release-name }}-${{ env.TAG_NAME }}.zip
           generate_release_notes: true
           draft: true
