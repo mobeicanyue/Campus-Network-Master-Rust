@@ -1,8 +1,8 @@
-use reqwest::blocking;
+use reqwest::blocking::Client;
 use serde_json::Value;
 use std::{env, path, thread, time};
 
-const FAILURE_WAIT_TIME:u64 = 4; // 请求失败后等待的时间，单位：秒
+const FAILURE_WAIT_TIME:u64 = 5; // 请求失败后等待的时间，单位：秒
 
 fn main() {
     // 打印架构和系统
@@ -32,12 +32,14 @@ fn main() {
     #[cfg(target_os = "windows")]
     {
         println!("Waiting for physical connection...");
-        thread::sleep(time::Duration::from_secs(5));
+        thread::sleep(time::Duration::from_secs(7));
     }
-
+    let client = Client::builder()
+        .no_proxy()
+        .build().unwrap();
     // 尝试请求10次，直到请求成功
     for _ in 0..10 {
-        match blocking::get(&url_login_https) {
+        match client.get(&url_login_https).send() {
             Ok(response) => {
                 println!(
                     "request status code: \x1b[0;37;42m{}\x1b[0m",
@@ -93,8 +95,8 @@ fn get_filename() -> String {
 
 fn extract_id_and_password(filename: &str) -> (&str, &str) {
     let mut parts = filename.split(';');
-    let id = parts.next().unwrap();
-    let passwd = parts.next().unwrap();
+    let id = parts.next().expect("\x1b[0;37;41m Please make sure your id and password are separated by ';'. \x1b[0m ");
+    let passwd = parts.next().expect("\x1b[0;37;41m Please make sure your id and password are separated by ';'. \x1b[0m ");
     if id.len() != 13 || !id.chars().all(char::is_numeric) {
         panic!("ID must be a 13-digit number.");
     }
