@@ -100,10 +100,18 @@ jobs:
         run: |
           move target\${{ matrix.target }}\release\${{env.build_filename}} "target\${{ matrix.target }}\release\${{env.new_filename}}"
 
+      - name: Markdown to PDF
+        uses: lothindir/pandoc-markdown-action@v0.1
+        with:
+          markdown: "README.md"
+          pdf: "README"
+
       - uses: actions/upload-artifact@v3
         with:
           path: |
             target/${{ matrix.target }}/release/${{env.new_filename}}
+            README.pdf
+
       - name: Get tag name
         if: matrix.os != 'windows-latest'
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -122,6 +130,7 @@ jobs:
           directory: target/${{ matrix.target }}/release/
           path: |
             ${{env.new_filename}}
+            README.pdf
 
       - name: Publish
         uses: softprops/action-gh-release@v1
