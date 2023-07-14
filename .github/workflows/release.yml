@@ -42,45 +42,45 @@ jobs:
           # linux
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-            release-name: LogInCQNU-Linux-x86_64
+            release-name: LoginCQNU-Linux-x86_64
             suffix: ""
 
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
-            release-name: LogInCQNU-Linux-arm64
+            release-name: LoginCQNU-Linux-arm64
             suffix: ""
 
           - os: ubuntu-latest
             target: armv7-unknown-linux-musleabihf
-            release-name: LogInCQNU-Linux-armv7-eabihf
+            release-name: LoginCQNU-Linux-armv7-eabihf
             suffix: ""
 
           - os: ubuntu-latest
             target: aarch64-linux-android
-            release-name: LogInCQNU-Android-arm64
+            release-name: LoginCQNU-Android-arm64
             suffix: ""
 
           # apple
           - os: macos-latest
             target: x86_64-apple-darwin
-            release-name: LogInCQNU-MacOS-x86_64
+            release-name: LoginCQNU-MacOS-x86_64
             suffix: ""
 
           - os: macos-latest
             target: aarch64-apple-darwin
-            release-name: LogInCQNU-MacOS-arm64
+            release-name: LoginCQNU-MacOS-arm64
             suffix: ""
 
           # windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            release-name: LogInCQNU-Windows-x86_64
+            release-name: LoginCQNU-Windows-x86_64
             suffix: .exe
 
           - os: windows-latest
             # Many compilation tools have insufficient support for arm64 windows
             target: aarch64-pc-windows-msvc
-            release-name: LogInCQNU-Windows-arm64
+            release-name: LoginCQNU-Windows-arm64
             suffix: .exe
 
     steps:
@@ -96,7 +96,7 @@ jobs:
 
       - name: Build Release
         run: |
-          cross build --release --locked --target ${{ matrix.target }}
+          cross build --release --target ${{ matrix.target }}
 
       - name: Strip (x86_64)
         if: contains(matrix.target, 'x86_64')
