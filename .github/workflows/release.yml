@@ -8,7 +8,27 @@ on:
   workflow_dispatch:
 
 jobs:
+  pre-release:
+    name: Build PDF
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: BaileyJM02/markdown-to-pdf@v1
+        with:
+          input_path: README.md
+          output_dir: README.pdf
+          build_html: false
+
+      - name: List files in working directory
+        run: ls -R
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: README.pdf
+          path: README.pdf
+
   release:
+    needs: pre-release
     name: Cross build for ${{ matrix.release-name }}
     runs-on: ${{ matrix.os }}
     env:
@@ -100,10 +120,10 @@ jobs:
         run: |
           move target\${{ matrix.target }}\release\${{env.build_filename}} "target\${{ matrix.target }}\release\${{env.new_filename}}"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/download-artifact@v3
         with:
-          path: |
-            target/${{ matrix.target }}/release/${{env.new_filename}}
+          name: README.pdf
+
       - name: Get tag name
         if: matrix.os != 'windows-latest'
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -114,14 +134,17 @@ jobs:
           $env:TAG_NAME = $env:GITHUB_REF -replace '^refs/tags/v'
           echo "TAG_NAME=$env:TAG_NAME" >> $env:GITHUB_ENV
 
+      - name: List files in working directory
+        run: ls -R
+
       - name: Zip Release Artifact
         uses: TheDoctor0/zip-release@0.7.1
         with:
           type: zip
           filename: ${{ matrix.release-name }}-${{ env.TAG_NAME }}.zip
-          directory: target/${{ matrix.target }}/release/
           path: |
-            ${{env.new_filename}}
+            target/${{ matrix.target }}/release/${{env.new_filename}}
+            README.pdf
 
       - name: Publish
         uses: softprops/action-gh-release@v1
@@ -130,6 +153,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            target/${{ matrix.target }}/release/${{ matrix.release-name }}-${{ env.TAG_NAME }}.zip
+            ${{ matrix.release-name }}-${{ env.TAG_NAME }}.zip
           generate_release_notes: true
           draft: true
