@@ -55,6 +55,11 @@ jobs:
             release-name: LogInCQNU-Linux-armv7-eabihf
             suffix: ""
 
+          - os: ubuntu-latest
+            target: aarch64-linux-android
+            release-name: LogInCQNU-Android-arm64
+            suffix: ""
+
           # apple
           - os: macos-latest
             target: x86_64-apple-darwin
