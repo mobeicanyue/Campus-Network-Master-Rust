@@ -8,6 +8,21 @@ on:
   workflow_dispatch:
 
 jobs:
+  pre-release:
+    name: Build PDF
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: BaileyJM02/markdown-to-pdf@v1
+        with:
+          input_path: README.md
+          output_dir: README.pdf
+          build_html: false
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: README.pdf
+
   release:
     name: Cross build for ${{ matrix.release-name }}
     runs-on: ${{ matrix.os }}
@@ -104,6 +119,7 @@ jobs:
         with:
           path: |
             target/${{ matrix.target }}/release/${{env.new_filename}}
+
       - name: Get tag name
         if: matrix.os != 'windows-latest'
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
@@ -119,9 +135,9 @@ jobs:
         with:
           type: zip
           filename: ${{ matrix.release-name }}-${{ env.TAG_NAME }}.zip
-          directory: target/${{ matrix.target }}/release/
           path: |
-            ${{env.new_filename}}
+            target/${{ matrix.target }}/release/${{env.new_filename}}
+            README.pdf
 
       - name: Publish
         uses: softprops/action-gh-release@v1
