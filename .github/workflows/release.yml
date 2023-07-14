@@ -19,7 +19,7 @@ jobs:
           output_dir: README.pdf
           build_html: false
 
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v3
         with:
           name: README.pdf
           path: README.pdf
