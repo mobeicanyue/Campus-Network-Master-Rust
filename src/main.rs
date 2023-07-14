@@ -1,15 +1,22 @@
-use reqwest::blocking::Client;
+use reqwest::{blocking::Client, tls::Version};
 use serde_json::Value;
-use std::{env, path, thread, time};
+use std::{
+    env,
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+    path, thread, time,
+};
 
-const FAILURE_WAIT_TIME:u64 = 5; // 请求失败后等待的时间，单位：秒
+const FAILURE_WAIT_TIME: u64 = 5; // 请求失败后等待的时间，单位：秒
 
 fn main() {
     // 打印架构和系统
     let arch: &str = env::consts::ARCH;
     let system: &str = env::consts::OS;
-    println!("Running on \x1b[0;30;43m {}-{} \x1b[0m system", arch, system);
-    
+    println!(
+        "Running on \x1b[0;30;43m {}-{} \x1b[0m system",
+        arch, system
+    );
+
     // 打印可执行文件名
     println!("Reading the executable filename...");
     let filename = get_filename();
@@ -34,9 +41,15 @@ fn main() {
         println!("Waiting for physical connection...");
         thread::sleep(time::Duration::from_secs(7));
     }
+
+    let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(10, 0, 254, 125)), 802);
     let client = Client::builder()
+        .resolve("https://auth.cqnu.edu.cn:802", addr)
+        .min_tls_version(Version::TLS_1_2)
         .no_proxy()
-        .build().unwrap();
+        .build()
+        .unwrap();
+
     // 尝试请求10次，直到请求成功
     for _ in 0..10 {
         match client.get(&url_login_https).send() {
@@ -95,8 +108,12 @@ fn get_filename() -> String {
 
 fn extract_id_and_password(filename: &str) -> (&str, &str) {
     let mut parts = filename.split(';');
-    let id = parts.next().expect("\x1b[0;37;41m Please make sure your id and password are separated by ';'. \x1b[0m ");
-    let passwd = parts.next().expect("\x1b[0;37;41m Please make sure your id and password are separated by ';'. \x1b[0m ");
+    let id = parts.next().expect(
+        "\x1b[0;37;41m Please make sure your id and password are separated by ';'. \x1b[0m ",
+    );
+    let passwd = parts.next().expect(
+        "\x1b[0;37;41m Please make sure your id and password are separated by ';'. \x1b[0m ",
+    );
     if id.len() != 13 || !id.chars().all(char::is_numeric) {
         panic!("ID must be a 13-digit number.");
     }
@@ -110,6 +127,9 @@ fn extract_json_data(response_text: &str) -> Value {
 
     match serde_json::from_str(json_data) {
         Ok(data) => data,
-        Err(err) => panic!("Failed to parse JSON: {},\n Please contact the developer with a bug report", err),
+        Err(err) => panic!(
+            "Failed to parse JSON: {},\n Please contact the developer with a bug report",
+            err
+        ),
     }
 }
