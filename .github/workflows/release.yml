@@ -55,6 +55,11 @@ jobs:
             release-name: LoginCQNU-Linux-armv7-eabihf
             suffix: ""
 
+          - os: ubuntu-latest
+            target: riscv64gc-unknown-linux-gnu
+            release-name: LoginCQNU-Linux-riscv64
+            suffix: ""
+
           # apple
           - os: macos-latest
             target: x86_64-apple-darwin
@@ -102,7 +107,7 @@ jobs:
       - name: Compress binaries by UPX
         # Upx may not support some platforms. Ignore the errors
         continue-on-error: true
-        if: matrix.target != 'aarch64-pc-windows-msvc'
+        if: matrix.target != 'aarch64-pc-windows-msvc' && matrix.target != 'riscv64gc-unknown-linux-gnu'
         uses: svenstaro/upx-action@v2
         with:
           strip: false
