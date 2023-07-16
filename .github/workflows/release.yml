@@ -42,7 +42,7 @@ jobs:
           # linux
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-            release-name: LoginCQNU-Linux-x86_64
+            release-name: LoginCQNU-Linux-X86_64
             suffix: ""
 
           - os: ubuntu-latest
@@ -55,15 +55,10 @@ jobs:
             release-name: LoginCQNU-Linux-armv7-eabihf
             suffix: ""
 
-          - os: ubuntu-latest
-            target: aarch64-linux-android
-            release-name: LoginCQNU-Android-arm64
-            suffix: ""
-
           # apple
           - os: macos-latest
             target: x86_64-apple-darwin
-            release-name: LoginCQNU-MacOS-x86_64
+            release-name: LoginCQNU-MacOS-X86_64
             suffix: ""
 
           - os: macos-latest
@@ -74,7 +69,7 @@ jobs:
           # windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            release-name: LoginCQNU-Windows-x86_64
+            release-name: LoginCQNU-Windows-X86_64
             suffix: .exe
 
           - os: windows-latest

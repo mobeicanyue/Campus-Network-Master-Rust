@@ -1,4 +1,4 @@
-# Login to CQNU campus network in `Rust`
+# **Login to CQNU campus network in `Rust`**
 [![Release](https://github.com/mobeicanyue/Campus-Network-Master-Rust/actions/workflows/release.yml/badge.svg)](https://github.com/mobeicanyue/Campus-Network-Master-Rust/actions/workflows/release.yml)
 
 * 用Rust 实现的Campus Network Master for CQNU 校园网登陆
@@ -19,7 +19,12 @@
     Linux 或 macos 打开终端，输入 `./2020051XXXXXX;123456` 回车
 ### 运行截图
 ![image](https://github.com/mobeicanyue/Campus-Network-Master-Rust/assets/81098819/d2b85c04-bb41-4b9b-90f4-1287c0cc461f)
-## **设置开机自启（可选）**
+
+<br>
+
+### **设置开机自启（可选）**
+<br>
+
 ### **Windows**
 1. 输入 `Win + R` 打开运行窗口
 2. 输入 `shell:startup` 打开启动文件夹
