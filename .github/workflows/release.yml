@@ -143,7 +143,7 @@ jobs:
         run: ls -R
 
       - name: Zip Release Artifact
-        uses: TheDoctor0/zip-release@0.7.1
+        uses: TheDoctor0/zip-release@0.7.5
         with:
           type: zip
           filename: ${{ matrix.release-name }}-${{ env.TAG_NAME }}.zip
