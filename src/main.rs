@@ -1,10 +1,6 @@
-use reqwest::{blocking::Client, tls::Version};
+use reqwest::blocking::Client;
 use serde_json::Value;
-use std::{
-    env,
-    net::{IpAddr, Ipv4Addr, SocketAddr},
-    path, thread, time,
-};
+use std::{env, path, thread, time};
 
 const FAILURE_WAIT_TIME: u64 = 5; // 请求失败后等待的时间，单位：秒
 
@@ -27,13 +23,13 @@ fn main() {
     println!("id: \x1b[0;37;45m{}\x1b[0m", id);
     println!("passwd: \x1b[0;30;46m{}\x1b[0m", passwd);
 
-    let _url_login: String = format!(
+    let url_http: String = format!(
         "http://10.0.254.125:801/eportal/portal/login?&user_account={id}&user_password={passwd}"
     );
-    let url_login_https: String = format!(
+    let _url_https: String = format!(
         "https://auth.cqnu.edu.cn:802/eportal/portal/login?&user_account={id}&user_password={passwd}"
     );
-    // println!("request url: \x1b[0;37;44m{}\x1b[0m", url_login);
+    // println!("request url: \x1b[0;37;44m{}\x1b[0m", url_http);
 
     // Windows下 等待物理连接建立
     #[cfg(target_os = "windows")]
@@ -42,17 +38,14 @@ fn main() {
         thread::sleep(time::Duration::from_secs(7));
     }
 
-    let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(10, 0, 254, 125)), 802);
     let client = Client::builder()
-        .resolve("https://auth.cqnu.edu.cn:802", addr)
-        .min_tls_version(Version::TLS_1_2)
         .no_proxy()
         .build()
         .unwrap();
 
     // 尝试请求10次，直到请求成功
     for _ in 0..10 {
-        match client.get(&url_login_https).send() {
+        match client.get(&url_http).send() {
             Ok(response) => {
                 println!(
                     "request status code: \x1b[0;37;42m{}\x1b[0m",

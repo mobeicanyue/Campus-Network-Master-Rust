@@ -55,10 +55,10 @@ jobs:
             release-name: LoginCQNU-Linux-armv7-eabihf
             suffix: ""
 
-          - os: ubuntu-latest
-            target: riscv64gc-unknown-linux-gnu
-            release-name: LoginCQNU-Linux-riscv64
-            suffix: ""
+          # - os: ubuntu-latest
+          #   target: riscv64gc-unknown-linux-gnu
+          #   release-name: LoginCQNU-Linux-riscv64
+          #   suffix: ""
 
           # apple
           - os: macos-latest
