@@ -124,7 +124,7 @@ jobs:
         run: |
           move target\${{ matrix.target }}\release\${{env.build_filename}} "target\${{ matrix.target }}\release\${{env.new_filename}}"
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: README.pdf
           path: target/${{ matrix.target }}/release/
