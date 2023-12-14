@@ -22,7 +22,7 @@ jobs:
       - name: List files in working directory
         run: ls -R
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: README.pdf
           path: README.pdf
